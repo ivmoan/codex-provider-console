@@ -68,6 +68,7 @@ class HostSessionDeletionTests(unittest.TestCase):
 
     def test_session_navigation_installs_a_refresh_hook_after_its_panel_exists(self):
         source = Path(__file__).resolve().parents[1].joinpath("web", "pages.py").read_text(encoding="utf-8")
-        self.assertIn("if(section!=='providers'&&!target){section='providers';target=null}", source)
+        self.assertIn("if(section!=='providers'&&!target){pendingSection=true;section='providers';target=null}", source)
         self.assertIn("const baseOpen=window.openConsoleSection;", source)
         self.assertIn("if(section==='sessions')refreshSessionManagement()", source)
+        self.assertIn("if(localStorage.getItem('console-section')==='sessions')window.openConsoleSection('sessions');", source)
