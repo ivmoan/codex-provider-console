@@ -167,6 +167,11 @@ case "${1:-}" in
     printf 'Codex CLI: %s\n' "$(sed -n 's/^CODEX_CLI_VERSION=//p' "$PROJECT_DIR/.env" 2>/dev/null | tail -n 1 || true)"
     ;;
   uninstall)
+    cli_user=$(configured_cli_user)
+    [[ "$(id -un)" == "$cli_user" ]] || {
+      echo "请使用部署用户 ${cli_user} 执行卸载，不要使用 root 或其他用户。" >&2
+      exit 1
+    }
     if [[ -z "${CODEX_HOME_HOST:-}" && -f "$PROJECT_DIR/.env" ]]; then
       CODEX_HOME_HOST=$(sed -n 's/^CODEX_HOME_HOST=//p' "$PROJECT_DIR/.env" | tail -n 1)
       CODEX_HOME_HOST=${CODEX_HOME_HOST#\"}
@@ -179,6 +184,11 @@ case "${1:-}" in
     data_real=$(realpath -m "$CODEX_HOME_HOST")
     [[ "$project_real" != "/" && "$project_real" != "$HOME" ]] || {
       echo "无法安全确认项目目录，卸载已取消。" >&2
+      exit 1
+    }
+    [[ "$data_real" != "/" && "$data_real" != "$HOME" && "$data_real" != "$project_real" && "$project_real" != "$data_real/"* ]] || {
+      echo "无法安全确认 Codex 数据目录，卸载已取消：$data_real" >&2
+      echo "请先修正 .env 中的 CODEX_HOME_HOST，再重新执行卸载。" >&2
       exit 1
     }
 
@@ -230,6 +240,48 @@ EOF
       fi
     fi
 
+    system_proxy_backend=""
+    system_proxy_domain=""
+    if [[ -f "$data_real/control-panel-settings.json" ]] && command -v python3 >/dev/null 2>&1; then
+      IFS='|' read -r system_proxy_backend system_proxy_domain < <(python3 - "$data_real/control-panel-settings.json" <<'PY'
+import json, sys
+try:
+    settings = json.load(open(sys.argv[1], encoding="utf-8"))
+    proxy = settings.get("reverse_proxy") if isinstance(settings, dict) else {}
+    proxy = proxy if isinstance(proxy, dict) else {}
+    print(f"{proxy.get('backend', '')}|{proxy.get('domain', '')}")
+except Exception:
+    print("|")
+PY
+      )
+    fi
+    if [[ "$system_proxy_backend" == "system_nginx" ]]; then
+      helper_path=/usr/local/sbin/codex-provider-console-nginx-deploy
+      staging="$PROJECT_DIR/.reverse-proxy-host-staging"
+      [[ -x "$helper_path" && -n "$system_proxy_domain" ]] || {
+        echo "检测到系统 Nginx 反向代理，但无法安全清理，卸载已取消。" >&2
+        exit 1
+      }
+      rm -rf -- "$staging"
+      mkdir -p -- "$staging"
+      printf '%s\n' "$system_proxy_domain" > "$staging/delete"
+      if [[ "$(id -u)" -eq 0 ]]; then
+        "$helper_path" >/dev/null
+      else
+        sudo -n "$helper_path" >/dev/null
+      fi
+      if [[ "$(id -u)" -eq 0 ]]; then
+        rm -f -- /etc/nginx/conf.d/codex-provider-console-domain-guard.conf
+        rm -rf -- /etc/nginx/codex-provider-console-certs
+        systemctl reload nginx.service
+      else
+        sudo -n rm -f -- /etc/nginx/conf.d/codex-provider-console-domain-guard.conf
+        sudo -n rm -rf -- /etc/nginx/codex-provider-console-certs
+        sudo -n systemctl reload nginx.service
+      fi
+      echo "已清理系统 Nginx 反向代理。"
+    fi
+
     if [[ "$REMOVE_CODEX" == false && ( "$data_real" == "$project_real" || "$data_real" == "$project_real/"* ) ]]; then
       preserved="$HOME/.codex-preserved-$(date +%Y%m%d-%H%M%S)"
       echo "检测到数据位于项目目录内，正在将数据保留到：$preserved"
@@ -250,6 +302,20 @@ EOF
       while IFS= read -r image_id; do
         [[ -n "$image_id" ]] && docker image rm "$image_id" >/dev/null 2>&1 || true
       done <<< "$project_images"
+    fi
+
+    helper_path=/usr/local/sbin/codex-provider-console-nginx-deploy
+    sudoers_path=/etc/sudoers.d/codex-provider-console-nginx-deploy
+    managed_nginx_backup=/var/lib/codex-provider-console
+    if [[ "$(id -u)" -eq 0 ]]; then
+      rm -f -- "$helper_path" "$sudoers_path"
+      rm -rf -- "$managed_nginx_backup"
+    elif command -v sudo >/dev/null 2>&1; then
+      sudo -n rm -f -- "$helper_path" "$sudoers_path"
+      sudo -n rm -rf -- "$managed_nginx_backup"
+    else
+      echo "无法清理 Nginx 辅助文件：需要 sudo。" >&2
+      exit 1
     fi
 
     cli_link="/usr/local/bin/codex"

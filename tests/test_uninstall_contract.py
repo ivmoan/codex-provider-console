@@ -17,6 +17,11 @@ class UninstallContractTests(unittest.TestCase):
         self.assertIn("确认停止进程并继续删除", source)
         self.assertIn("已确认无残留", source)
         self.assertIn('cd "$HOME"', source)
+        self.assertIn('请使用部署用户', source)
+        self.assertIn('无法安全确认 Codex 数据目录', source)
+        self.assertIn('system_proxy_backend', source)
+        self.assertIn('/etc/nginx/codex-provider-console-certs', source)
+        self.assertIn('/etc/sudoers.d/codex-provider-console-nginx-deploy', source)
         self.assertIn("codex-panel-preserved", source) if "codex-panel-preserved" in source else self.assertIn(".codex-preserved-", source)
 
     def test_uninstall_requires_confirmation_before_moving_relative_data(self):
