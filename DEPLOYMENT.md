@@ -28,7 +28,7 @@ sudo docker compose version
 也可以直接让安装脚本在支持的发行版上安装 Docker：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh) --install-docker
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh) --install-docker
 ```
 
 Optional: allow the current user to run Docker without `sudo`:
@@ -50,7 +50,7 @@ sudo apt upgrade -y
 ```
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh)
 ```
 
 The one-command installer clones the project to `~/codex-provider-console` and
@@ -60,7 +60,7 @@ to install missing `curl` and `git` tools. If `curl` is not installed but `wget`
 is available, use:
 
 ```bash
-bash <(wget -qO- https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh)
 ```
 
 If neither `curl` nor `wget` is present, install one download tool first; a
@@ -89,7 +89,7 @@ The resume command depends on when the interruption happened:
   command again to resume automatically:
 
   ```bash
-  bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh)
+  bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh)
   ```
 
 - After `.env` has been created, while Docker or the CLI is being installed, or
@@ -111,7 +111,7 @@ port and press Enter.
 To allow Docker installation through the installer on common Linux distributions:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh) --install-docker
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh) --install-docker
 ```
 
 When run interactively, the one-command installer asks whether to install Docker if it
@@ -151,7 +151,7 @@ sessions again yourself after the work is complete.
 Useful installer options:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh) --codex-home /home/alice/.codex --port 8787
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh) --codex-home /home/alice/.codex --port 8787
 ```
 
 The panel login is enabled by default. Direct HTTP access is intended only for

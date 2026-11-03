@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-REPOSITORY_URL="https://github.com/Sika-Liu/codex-provider-console.git"
+REPOSITORY_URL="https://github.com/ivmoan/codex-provider-console.git"
 DEPLOY_USER="${SUDO_USER:-$(id -un)}"
 INSTALL_ARGS=()
 

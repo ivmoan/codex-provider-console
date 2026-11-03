@@ -20,19 +20,19 @@
 如果服务器还没有 Docker，可以让安装器自动安装：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh) --install-docker
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh) --install-docker
 ```
 
 ### 2. 一键安装
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh)
 ```
 
 没有 `curl` 时可以使用：
 
 ```bash
-bash <(wget -qO- https://raw.githubusercontent.com/Sika-Liu/codex-provider-console/main/bootstrap.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/ivmoan/codex-provider-console/main/bootstrap.sh)
 ```
 
 安装过程中会询问面板端口，默认是 `8787`。首次安装还会生成管理员用户名、随机密码和会话密钥，并在终端中显示一次，请及时保存。
